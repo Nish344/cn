@@ -1,36 +1,37 @@
-package pgm8;
+package UDP;
 import java.net.*;
+import java.io.*;
 
-class UDPServer {
-    public static void main(String[] args) throws Exception {
+public class ServerSide {
+    public static void main(String[] args) {
+        try {
+            DatagramSocket ds = new DatagramSocket();
+            BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
 
-        DatagramSocket serverSocket = new DatagramSocket(9876);
+            System.out.println("Server ready. Type messages to send to client.");
 
-        byte[] receiveData = new byte[1024];
-        byte[] sendData;
+            InetAddress ip = InetAddress.getByName("127.0.0.1");
+            int port = 4000;
 
-        while (true) {
-            System.out.println("Server is Up...");
+            while (true) {
+                System.out.print("Server: ");
+                String msg = br.readLine();
 
-            DatagramPacket receivePacket =
-                    new DatagramPacket(receiveData, receiveData.length);
-            serverSocket.receive(receivePacket);
+                if (msg.equalsIgnoreCase("exit")) {
+                    System.out.println("Server closed.");
+                    break;
+                }
 
-            String sentence =
-                    new String(receivePacket.getData(), 0, receivePacket.getLength());
+                byte[] b = msg.getBytes();
 
-            System.out.println("RECEIVED: " + sentence);
+                DatagramPacket dp = new DatagramPacket(b, b.length, ip, port);
+                ds.send(dp);
+            }
 
-            InetAddress IPAddress = receivePacket.getAddress();
-            int port = receivePacket.getPort();
+            ds.close();
 
-            String capitalizedSentence = sentence.toUpperCase();
-            sendData = capitalizedSentence.getBytes();
-
-            DatagramPacket sendPacket =
-                    new DatagramPacket(sendData, sendData.length, IPAddress, port);
-
-            serverSocket.send(sendPacket);
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
 }
