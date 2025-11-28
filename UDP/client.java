@@ -1,36 +1,32 @@
-package pgm8;
-import java.io.*;
+package UDP;
 import java.net.*;
 
-class UDPClient {
-    public static void main(String[] args) throws Exception {
+public class ClientSide {
+    public static void main(String[] args) {
+        try {
+            DatagramSocket ds = new DatagramSocket(4000);
+            byte[] buffer = new byte[1024];
 
-        BufferedReader inFromUser = new BufferedReader(new InputStreamReader(System.in));
-        DatagramSocket clientSocket = new DatagramSocket();
+            System.out.println("Client waiting for messages...\n");
 
-        InetAddress IPAddress = InetAddress.getByName("localhost");
+            while (true) {
+                DatagramPacket dp = new DatagramPacket(buffer, buffer.length);
+                ds.receive(dp);
 
-        byte[] sendData;
-        byte[] receiveData = new byte[1024];
+                String msg = new String(dp.getData(), 0, dp.getLength());
 
-        System.out.println("Enter the string to be converted to Uppercase:");
-        String sentence = inFromUser.readLine();
+                if (msg.equalsIgnoreCase("exit")) {
+                    System.out.println("Server closed the chat.");
+                    break;
+                }
 
-        sendData = sentence.getBytes();
+                System.out.println("Server: " + msg);
+            }
 
-        DatagramPacket sendPacket =
-                new DatagramPacket(sendData, sendData.length, IPAddress, 9876);
-        clientSocket.send(sendPacket);
+            ds.close();
 
-        DatagramPacket receivePacket =
-                new DatagramPacket(receiveData, receiveData.length);
-        clientSocket.receive(receivePacket);
-
-        String modifiedSentence =
-                new String(receivePacket.getData(), 0, receivePacket.getLength());
-
-        System.out.println("FROM SERVER: " + modifiedSentence);
-
-        clientSocket.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 }
