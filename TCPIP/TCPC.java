@@ -1,30 +1,36 @@
-package pgm7;
+package TCPIP;
 import java.net.*;
 import java.io.*;
 
-public class TCPC {
-    public static void main(String[] args) throws Exception {
-        
-        Socket sock = new Socket("127.0.0.1", 4000);
+public class clientSide {
+    public static void main(String[] args) {
 
-        System.out.println("Enter the filename:");
-        BufferedReader keyRead = new BufferedReader(new InputStreamReader(System.in));
-        String fname = keyRead.readLine();
+        try (Socket socket = new Socket("127.0.0.1", 4000)) {
 
-        PrintWriter pwrite = new PrintWriter(sock.getOutputStream(), true);
-        pwrite.println(fname);
+            System.out.println("Enter the filename:");
+            BufferedReader keyRead = new BufferedReader(new InputStreamReader(System.in));
+            String fname = keyRead.readLine();
 
-        BufferedReader socketRead = new BufferedReader(new InputStreamReader(sock.getInputStream()));
-        String str;
+            PrintWriter pwrite = new PrintWriter(socket.getOutputStream(), true);
+            pwrite.println(fname);
 
-        System.out.println("\n--- File Content ---\n");
-        while ((str = socketRead.readLine()) != null) {
-            System.out.println(str);
+            BufferedReader socketRead = new BufferedReader(
+                    new InputStreamReader(socket.getInputStream())
+            );
+
+            System.out.println("\n--- File Content ---\n");
+            String str;
+
+            while ((str = socketRead.readLine()) != null) {
+                System.out.println(str);
+            }
+
+            keyRead.close();
+            socketRead.close();
+            pwrite.close();
+
+        } catch (Exception e) {
+            e.printStackTrace();
         }
-
-        pwrite.close();
-        socketRead.close();
-        keyRead.close();
-        sock.close();
     }
 }
