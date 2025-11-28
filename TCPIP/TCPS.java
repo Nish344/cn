@@ -1,31 +1,46 @@
-package pgm7;
+package TCPIP;
 import java.net.*;
 import java.io.*;
 
-public class TCPS {
-    public static void main(String[] args) throws Exception {
+public class serverSide {
+    public static void main(String[] args) {
 
-        ServerSocket sersock = new ServerSocket(4000);
-        System.out.println("Server ready for connection...");
+        try (ServerSocket serverSocket = new ServerSocket(4000)) {
+            System.out.println("Server ready for connection...");
 
-        Socket sock = sersock.accept();
-        System.out.println("Client connected!");
+            Socket socket = serverSocket.accept();
+            System.out.println("Client connected!");
 
-        BufferedReader fileRead = new BufferedReader(new InputStreamReader(sock.getInputStream()));
-        String fname = fileRead.readLine();
+            BufferedReader fileRead = new BufferedReader(
+                    new InputStreamReader(socket.getInputStream())
+            );
 
-        BufferedReader contentRead = new BufferedReader(new FileReader(fname));
-        PrintWriter pwrite = new PrintWriter(sock.getOutputStream(), true);
+            String fname = fileRead.readLine();
+            PrintWriter pwrite = new PrintWriter(socket.getOutputStream(), true);
 
-        String str;
-        while ((str = contentRead.readLine()) != null) {
-            pwrite.println(str);
+            String filePath = "C:\\Users\\Nishanth Antony\\Downloads\\computerNetworks\\src\\TCPIP\\";
+            File file = new File(filePath+fname);
+
+            // Check file exists
+            if (!file.exists()) {
+                pwrite.println("ERROR: File Not Found");
+            } else {
+                try (BufferedReader contentRead = new BufferedReader(new FileReader(file))) {
+                    String line;
+                    while ((line = contentRead.readLine()) != null) {
+                        pwrite.println(line);
+                    }
+                }
+            }
+
+            // Close everything
+            fileRead.close();
+            pwrite.close();
+            socket.close();
+            System.out.println("Connection closed.");
+
+        } catch (Exception e) {
+            e.printStackTrace();
         }
-
-        contentRead.close();
-        fileRead.close();
-        pwrite.close();
-        sock.close();
-        sersock.close();
     }
 }
